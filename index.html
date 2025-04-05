@@ -3,35 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <title>Flappy Bird Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
 
     body {
       background: #70c5ce;
       overflow: hidden;
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
     }
 
     canvas {
       display: block;
       margin: auto;
       background: #70c5ce;
+      width: 100vw;
+      height: 100vh;
     }
 
-    #score {
+    #score, #history {
       position: absolute;
       top: 10px;
       left: 10px;
       font-size: 24px;
       color: white;
       font-weight: bold;
-      font-family: Arial, sans-serif;
     }
 
-    #startBtn {
+    #history {
+      top: 40px;
+      font-size: 18px;
+    }
+
+    #startBtn, #difficulty {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -42,27 +50,45 @@
       border: none;
       border-radius: 10px;
       cursor: pointer;
+      display: block;
+      z-index: 10;
+    }
+
+    #difficulty {
+      top: 60%;
+      background-color: #ffffff;
+      font-size: 18px;
+      padding: 10px 20px;
     }
   </style>
 </head>
 <body>
 
 <div id="score">Score: 0</div>
+<div id="history">Last Score: 0</div>
 <button id="startBtn">START</button>
+<select id="difficulty">
+  <option value="easy">Easy</option>
+  <option value="hard">Hard</option>
+</select>
 <canvas id="gameCanvas" width="400" height="600"></canvas>
 
 <script>
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
   const startBtn = document.getElementById("startBtn");
+  const difficultySelect = document.getElementById("difficulty");
+
   let gameStarted = false;
+  let lastScore = 0;
+  let gravity = 0.6;
+  let pipeSpeed = 2;
 
   let bird = {
     x: 50,
     y: 150,
     width: 30,
     height: 30,
-    gravity: 0.6,
     lift: -10,
     velocity: 0
   };
@@ -96,7 +122,7 @@
   }
 
   function updateGame() {
-    bird.velocity += bird.gravity;
+    bird.velocity += gravity;
     bird.y += bird.velocity;
 
     if (bird.y + bird.height > canvas.height || bird.y < 0) {
@@ -104,9 +130,8 @@
     }
 
     for (let pipe of pipes) {
-      pipe.x -= 2;
+      pipe.x -= pipeSpeed;
 
-      // Check collision
       if (
         bird.x < pipe.x + pipeWidth &&
         bird.x + bird.width > pipe.x &&
@@ -115,7 +140,6 @@
         resetGame();
       }
 
-      // Increase score
       if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
         pipe.passed = true;
         score++;
@@ -145,6 +169,9 @@
   }
 
   function resetGame() {
+    lastScore = score;
+    document.getElementById("history").textContent = "Last Score: " + lastScore;
+
     bird.y = 150;
     bird.velocity = 0;
     pipes = [];
@@ -152,6 +179,7 @@
     document.getElementById("score").textContent = "Score: 0";
     gameStarted = false;
     startBtn.style.display = "block";
+    difficultySelect.style.display = "block";
   }
 
   // Controls
@@ -167,11 +195,22 @@
     }
   });
 
-  // Start the game
+  // Start game
   startBtn.addEventListener("click", function() {
     resetGame();
+
+    const difficulty = difficultySelect.value;
+    if (difficulty === "easy") {
+      gravity = 0.5;
+      pipeSpeed = 2;
+    } else if (difficulty === "hard") {
+      gravity = 0.7;
+      pipeSpeed = 3.5;
+    }
+
     gameStarted = true;
     startBtn.style.display = "none";
+    difficultySelect.style.display = "none";
   });
 
   // Start the loop

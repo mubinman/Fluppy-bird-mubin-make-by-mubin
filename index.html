@@ -1,258 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Flappy Bird Game</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background: linear-gradient(to bottom, #70c5ce, #ffffff);
-      overflow: hidden;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    canvas {
-      display: block;
-      margin: auto;
-      background: transparent;
-    }
-
-    #score, #history {
-      position: absolute;
-      left: 20px;
-      font-size: 24px;
-      color: #222;
-      font-weight: bold;
-      text-shadow: 1px 1px 3px white;
-    }
-
-    #score {
-      top: 20px;
-    }
-
-    #history {
-      top: 60px;
-      font-size: 18px;
-    }
-
-    #startBtn, #difficulty {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 20px;
-      padding: 15px 30px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      z-index: 10;
-      transition: background 0.3s ease;
-    }
-
-    #startBtn {
-      top: 45%;
-      background-color: #ffcc00;
-    }
-
-    #startBtn:hover {
-      background-color: #e6b800;
-    }
-
-    #difficulty {
-      top: 55%;
-      background-color: #ffffff;
-    }
-
-    #difficulty:hover {
-      background-color: #f0f0f0;
-    }
-
-    #message {
-      position: absolute;
-      top: 20%;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 20px;
-      background-color: rgba(255, 255, 255, 0.9);
-      border-radius: 12px;
-      font-size: 18px;
-      font-weight: bold;
-      text-align: center;
-      max-width: 90%;
-      z-index: 10;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMU Panel Seller</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #555;
+            margin-bottom: 15px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        ul li {
+            margin-bottom: 8px;
+            color: #666;
+            line-height: 1.5;
+        }
+        .price {
+            font-size: 2.5em;
+            color: #e44d26;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .buy-button, .proof-button {
+            display: inline-block;
+            background-color: #28a745;
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1.2em;
+            margin: 10px 5px;
+            transition: background-color 0.3s ease;
+        }
+        .buy-button:hover, .proof-button:hover {
+            background-color: #218838;
+        }
+        .proof-button {
+            background-color: #007bff;
+        }
+        .proof-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-  <div id="score">Score: 0</div>
-  <div id="history">Last Score: 0</div>
-  <div id="message">If you score 30 in Hard, then you will get 100rs. If you score 80 in Easy, then you will get 100rs.</div>
-  <button id="startBtn">START</button>
-  <select id="difficulty">
-    <option value="easy">Easy</option>
-    <option value="hard">Hard</option>
-  </select>
-  <canvas id="gameCanvas" width="400" height="600"></canvas>
-
-  <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const startBtn = document.getElementById("startBtn");
-    const difficultySelect = document.getElementById("difficulty");
-    const messageBox = document.getElementById("message");
-
-    let gameStarted = false;
-    let lastScore = 0;
-    let gravity = 0.4;
-    let pipeSpeed = 2;
-
-    let bird = {
-      x: 50,
-      y: 150,
-      radius: 15,
-      lift: -7,
-      velocity: 0,
-    };
-
-    let pipes = [];
-    const pipeWidth = 60;
-    const pipeGap = 140;
-    let score = 0;
-
-    function createPipe() {
-      const topHeight = Math.floor(Math.random() * (canvas.height - pipeGap - 100)) + 20;
-      pipes.push({
-        x: canvas.width,
-        top: topHeight,
-        bottom: topHeight + pipeGap,
-        passed: false
-      });
-    }
-
-    function drawBird() {
-      ctx.beginPath();
-      ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
-      ctx.fillStyle = "#222";
-      ctx.shadowColor = "#000";
-      ctx.shadowBlur = 4;
-      ctx.fill();
-      ctx.closePath();
-      ctx.shadowBlur = 0;
-    }
-
-    function drawPipes() {
-      for (let pipe of pipes) {
-        // Pipe Top
-        ctx.fillStyle = "#228B22";
-        ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
-        ctx.shadowColor = "#000";
-        ctx.shadowBlur = 4;
-
-        // Pipe Bottom
-        ctx.fillRect(pipe.x, pipe.bottom, pipeWidth, canvas.height - pipe.bottom);
-        ctx.shadowBlur = 0;
-      }
-    }
-
-    function updateGame() {
-      bird.velocity += gravity;
-      bird.y += bird.velocity;
-
-      if (bird.y + bird.radius > canvas.height || bird.y - bird.radius < 0) {
-        resetGame();
-      }
-
-      for (let pipe of pipes) {
-        pipe.x -= pipeSpeed;
-
-        if (
-          bird.x + bird.radius > pipe.x &&
-          bird.x - bird.radius < pipe.x + pipeWidth &&
-          (bird.y - bird.radius < pipe.top || bird.y + bird.radius > pipe.bottom)
-        ) {
-          resetGame();
-        }
-
-        if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
-          pipe.passed = true;
-          score++;
-          document.getElementById("score").textContent = "Score: " + score;
-        }
-      }
-
-      if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 200) {
-        createPipe();
-      }
-
-      pipes = pipes.filter(pipe => pipe.x + pipeWidth > 0);
-    }
-
-    function drawGame() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawBird();
-      drawPipes();
-    }
-
-    function gameLoop() {
-      if (gameStarted) {
-        updateGame();
-        drawGame();
-      }
-      requestAnimationFrame(gameLoop);
-    }
-
-    function resetGame() {
-      lastScore = score;
-      document.getElementById("history").textContent = "Last Score: " + lastScore;
-
-      bird.y = 150;
-      bird.velocity = 0;
-      pipes = [];
-      score = 0;
-      document.getElementById("score").textContent = "Score: 0";
-      gameStarted = false;
-      startBtn.style.display = "block";
-      difficultySelect.style.display = "block";
-      messageBox.style.display = "block";
-    }
-
-    document.addEventListener("keydown", function(e) {
-      if (e.code === "Space" && gameStarted) {
-        bird.velocity = bird.lift;
-      }
-    });
-
-    document.addEventListener("touchstart", function() {
-      if (gameStarted) {
-        bird.velocity = bird.lift;
-      }
-    });
-
-    startBtn.addEventListener("click", function() {
-      resetGame();
-
-      const difficulty = difficultySelect.value;
-      if (difficulty === "easy") {
-        gravity = 0.5;
-        pipeSpeed = 2;
-      } else if (difficulty === "hard") {
-        gravity = 0.7;
-        pipeSpeed = 3.5;
-      }
-
-      gameStarted = true;
-      startBtn.style.display = "none";
-      difficultySelect.style.display = "none";
-      messageBox.style.display = "none";
-    });
-
-    gameLoop();
-  </script>
+    <div class="container">
+        <h1>OMU Panel Seller</h1>
+        <img src="https://jivangaming.in/images/sensi-premium-android.jpg" alt="Sensi Advance Pack for Android">
+        <h2># Sensi Advance Pack for Android</h2>
+        <h3>What will I get in advance sensi?</h3>
+        <ul>
+            <li>• Device booster ☠️</li>
+            <li>• Advanced secret tips</li>
+            <li>• Gameplay & device optimized sensi</li>
+            <li>• No recoil UMP tips</li>
+            <li>• Auto aim lock trick 🤫</li>
+            <li>• Smooth device APK 🤫</li>
+            <li>• Gloo wall tricks ✅☠️👾</li>
+            <li>• Best HUDs 🥷</li>
+            <li>• FPS boost ☠️✅</li>
+            <li>• 90-95% headshot chance</li>
+            <li>• Headshot method 💀</li>
+            <li>• 100% gameplay improvement</li>
+        </ul>
+        <div class="price">299 RS</div>
+        <a href="https://ibb.co/XQxH9SW" class="buy-button" target="_blank">BUY NOW</a>
+        <a href="https://wa.me/qr/ELH5ZYVTFHLJO1" class="proof-button" target="_blank">SEND PROOF</a>
+    </div>
 </body>
 </html>
